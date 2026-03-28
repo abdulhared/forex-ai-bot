@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 redis = "*"
 influxdb-client = "*"
+loguru = "*"
 
 [dev-packages]
 
