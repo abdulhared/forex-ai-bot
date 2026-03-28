@@ -125,4 +125,15 @@ class SQLiteClient:
             ))
 
             conn.commit()
+    
+    def get_all_trades(self):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT * FROM trades
+                ORDER BY opened_at DESC 
+            """)
+            rows = cursor.fetchall()
+            return rows
             
