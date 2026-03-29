@@ -136,4 +136,14 @@ class SQLiteClient:
             """)
             rows = cursor.fetchall()
             return rows
-            
+
+    def get_all_signals(self):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT * FROM signals
+                ORDER BY timestamp DESC
+            """)
+            rows = cursor.fetchall()
+            return rows
