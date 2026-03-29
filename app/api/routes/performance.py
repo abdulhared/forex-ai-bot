@@ -6,30 +6,21 @@ router = APIRouter()
 
 @router.get("/performance")
 def get_performance(date: str = Query(..., description="Date in YYYY-MM-DD format")):
-    """
-    Get daily performance metrics for a specific date.
-    
-    Args:
-        date: Date in YYYY-MM-DD format (e.g., "2026-03-28")
-    
-    Returns:
-        Performance metrics including total trades, win rate, gross PnL, etc.
-    """
+    """Get daily performance metrics for a specific date"""
     db = SQLiteClient()
-    performance = db.get_performance(date)
+    performance = db.get_performance(date)  # Returns dict or None
     
     if not performance:
+        # Return zeros for consistent schema (better for clients)
         return {
             "date": date,
-            "message": "No performance data found for this date"
+            "total_trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "gross_pnl": 0.0,
+            "win_rate": 0.0,
+            "opening_balance": None
         }
     
-    return {
-        "date": performance[0],
-        "total_trades": performance[1],
-        "wins": performance[2],
-        "losses": performance[3],
-        "gross_pnl": performance[4],
-        "win_rate": performance[5],
-        "opening_balance": performance[6]
-    }
+    # performance is already a dict from row_factory
+    return performance

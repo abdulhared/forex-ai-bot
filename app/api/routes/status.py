@@ -5,14 +5,7 @@ router = APIRouter()
 
 @router.get("/status")
 def get_status():
-    """
-    Get the current status of the trading bot.
-    
-    Returns:
-        - status: running/stopped
-        - model_version: AI model version
-        - active_pairs: list of currency pairs being traded
-    """
+    """Get current bot status, model version, and active trading pairs"""
     return {
         "status": "running",
         "model_version": "v1.0.0",

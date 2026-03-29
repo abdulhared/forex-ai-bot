@@ -100,16 +100,19 @@ class SQLiteClient:
 
     def get_performance(self, date):
         with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
             cursor.execute(""" 
                 SELECT * FROM performance_daily WHERE date = ?
             """, (date,))
 
-            # fetch all results
             row = cursor.fetchone()
-
-            return row
+            
+            if row is None:
+                return None
+            
+            return dict(row)
 
     def log_error(self, category, message, context):
         with sqlite3.connect(self.db_path) as conn:
@@ -128,6 +131,7 @@ class SQLiteClient:
     
     def get_all_trades(self):
         with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
             cursor.execute("""
@@ -135,10 +139,11 @@ class SQLiteClient:
                 ORDER BY opened_at DESC 
             """)
             rows = cursor.fetchall()
-            return rows
+            return [dict(row) for row in rows]
 
     def get_all_signals(self):
         with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
             cursor.execute("""
@@ -146,4 +151,4 @@ class SQLiteClient:
                 ORDER BY timestamp DESC
             """)
             rows = cursor.fetchall()
-            return rows
+            return [dict(row) for row in rows]
