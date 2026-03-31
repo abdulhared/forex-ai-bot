@@ -1,83 +1,56 @@
 # training/data/historical_fetcher.py
 
-import time
-from datetime import datetime, timezone
-import oandapyV20
-import oandapyV20.endpoints.instruments as instruments
-from app.shared.config import OANDA_API_KEY, OANDA_ENVIRONMENT
-from app.infrastructure.monitoring.logger import setup_logger
+import pandas as pd
+from typing import List, Dict, Any
 
 
 class HistoricalFetcher:
-    """
-    Downloads historical OANDA candles for training.
-    Paginates backwards in time, 5000 candles per request.
-    """
-
-    MAX_PER_REQUEST = 5000
-    RATE_LIMIT_DELAY = 0.5  # seconds between requests
-
-    def __init__(self):
-        self.client = oandapyV20.API(
-            access_token=OANDA_API_KEY,
-            environment=OANDA_ENVIRONMENT
-        )
-        self.logger = setup_logger()
-
-    def fetch(self, pair: str, granularity: str = "M15",
-              target_candles: int = 70_000) -> list:
+    """Fetch and aggregate historical Forex data from Histdata.com CSV files."""
+    
+    def fetch(self, filepath: str) -> List[Dict[str, Any]]:
         """
-        Fetch historical candles working backwards from now.
-
+        Read M1 CSV, aggregate to M15, return candle dicts.
+        
         Args:
-            pair:            Instrument e.g. "EUR_USD"
-            granularity:     Timeframe e.g. "M15"
-            target_candles:  How many candles to collect
-
+            filepath: Path to Histdata.com CSV file (semicolon-separated, no header)
+            
         Returns:
-            List of candle dicts, oldest first
+            List of candle dicts oldest first, formatted for data_cleaner.py
         """
-        all_candles = []
-        to_time = datetime.now(timezone.utc)  # start from now
-
-        self.logger.info(f"Fetching {target_candles} {granularity} candles for {pair}")
-
-        while len(all_candles) < target_candles:
-
-            # Build request params
-            params = {
-                "granularity": granularity,
-                "count": self.MAX_PER_REQUEST,
-                "to": to_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        # Read CSV with semicolon separator, no header
+        df = pd.read_csv(
+            filepath, 
+            sep=";", 
+            header=None,
+            names=["datetime", "open", "high", "low", "close", "volume"]
+        )
+        
+        # Parse datetime and set as index
+        df["datetime"] = pd.to_datetime(df["datetime"], format="%Y%m%d %H%M%S")
+        df = df.set_index("datetime")
+        
+        # Resample to 15min with OHLCV aggregation rules
+        m15 = df.resample("15min").agg({
+            "open": "first",
+            "high": "max",
+            "low": "min",
+            "close": "last",
+            "volume": "sum"
+        }).dropna()
+        
+        # Convert to list of candle dicts with native Python types
+        candles = []
+        for timestamp, row in m15.iterrows():
+            candle = {
+                "time": timestamp.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "mid": {
+                    "o": float(round(row["open"], 5)),
+                    "h": float(round(row["high"], 5)),
+                    "l": float(round(row["low"], 5)),
+                    "c": float(round(row["close"], 5)),
+                },
+                "volume": int(row["volume"])
             }
-
-            # Make request
-            request = instruments.InstrumentsCandles(pair, params=params)
-            response = self.client.request(request)
-            candles = response["candles"]
-
-            # Stop if no data returned
-            if not candles:
-                self.logger.info("No more candles available — stopping")
-                break
-
-            # Prepend chunk (we're going backwards — older data goes to front)
-            all_candles = candles + all_candles
-
-            # Update to_time — move to oldest candle in this chunk
-            oldest_time_str = candles[0]["time"]  # index 0 = oldest
-            to_time = datetime.fromisoformat(
-                oldest_time_str.replace("Z", "+00:00")
-            )
-
-            self.logger.info(
-                f"Fetched {len(candles)} candles | "
-                f"Total: {len(all_candles)} | "
-                f"Oldest: {oldest_time_str}"
-            )
-
-            # Respect rate limit
-            time.sleep(self.RATE_LIMIT_DELAY)
-
-        self.logger.info(f"Done. Total candles fetched: {len(all_candles)}")
-        return all_candles
+            candles.append(candle)
+        
+        return candles

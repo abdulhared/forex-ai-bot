@@ -6,8 +6,8 @@ from app.infrastructure.monitoring.logger import setup_logger
 
 class DataCleaner:
     """
-    Cleans raw OANDA candle data before training.
-    Removes duplicates, gaps, zero-volume, and flat candles.
+    Cleans raw candle data before training.
+    Removes duplicates, gaps, and flat candles.
     """
 
     M15_INTERVAL = timedelta(minutes=15)
@@ -21,7 +21,7 @@ class DataCleaner:
         Full cleaning pipeline.
 
         Args:
-            raw_candles: Raw list of candle dicts from OANDA
+            raw_candles: Raw list of candle dicts
 
         Returns:
             Cleaned list of candle dicts
@@ -50,19 +50,14 @@ class DataCleaner:
         return unique
 
     def _remove_invalid(self, candles: list) -> list:
-        """Remove zero-volume and flat candles."""
+        """Remove flat candles (high == low indicates no price movement)."""
         valid = []
         for candle in candles:
             mid = candle.get("mid", {})
             high = float(mid.get("h", 0))
             low = float(mid.get("l", 0))
-            volume = candle.get("volume", 0)
 
-            # Skip zero volume
-            if volume == 0:
-                continue
-
-            # Skip flat candles
+            # Skip flat candles only
             if high == low:
                 continue
 

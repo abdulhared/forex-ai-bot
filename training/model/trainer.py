@@ -79,7 +79,7 @@ class Trainer:
                     position=info["position"],
                     opened_trade=False,
                     closed_trade=False,
-                    equity=info["equity"],
+                    equity=info["total_equity"],
                     initial_balance=10_000.0,
                 )
 
