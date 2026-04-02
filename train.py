@@ -40,7 +40,7 @@ def main():
         lr=3e-4,
         gamma=0.99,
         epsilon=0.2,
-        epochs=4,
+        epochs=4, 
         batch_size=64
     )
     print(f"      Model: Actor-Critic (20 -> 128 -> 3)")
@@ -48,7 +48,7 @@ def main():
     
     # 4. Training loop (10k steps for quick test)
     print("\n[4/5] Starting training (10,000 steps)...")
-    total_timesteps = 10_000
+    total_timesteps = 1_000_000
     episode_rewards = []
     
     state, _ = env.reset()

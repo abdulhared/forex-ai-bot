@@ -20,7 +20,7 @@ class PPOAgent:
         input_dim:   int   = 20,
         hidden_dim:  int   = 128,
         n_actions:   int   = 3,
-        lr:          float = 3e-4,
+        lr:          float = 3e-5, # change to 3e-5 after first training run 
         gamma:       float = 0.99,
         epsilon:     float = 0.2,
         epochs:      int   = 4,
@@ -261,7 +261,7 @@ class PPOAgent:
                 # -------------------------
 
                 critic_loss = nn.MSELoss()(
-                    b_values.squeeze(),
+                    b_values.squeeze(-1),
                     b_returns
                 )
 
@@ -285,6 +285,8 @@ class PPOAgent:
 
                 loss.backward()
 
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=0.5)
+                
                 self.optimizer.step()
 
         # Clear buffer

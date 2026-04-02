@@ -8,7 +8,7 @@ os.makedirs("data/features", exist_ok=True)
 
 # Step 1 — fetch
 fetcher = HistoricalFetcher()
-candles = fetcher.fetch(r"C:\Users\abdul\OneDrive\Desktop\DAT_ASCII_EURUSD_M1_2020.csv")
+candles = fetcher.fetch(r"C:\Users\abdul\Downloads\HISTDATA_COM_ASCII_EURUSD_M12022\DAT_ASCII_EURUSD_M1_2022.csv")
 print(f"Fetched: {len(candles)} candles")
 
 # Step 2 — clean
@@ -23,6 +23,6 @@ print(f"Feature matrix shape: {matrix.shape}")
 print(f"First feature vector: {matrix[0]}")
 
 # Step 4 — save
-save_path = "data/features/eurusd_2020"
+save_path = "data/features/eurusd_2022"
 builder.save(matrix, save_path)
 print(f"Saved to: {save_path}.npy")
