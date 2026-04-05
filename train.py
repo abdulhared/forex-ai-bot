@@ -21,7 +21,7 @@ def main():
     # 1. Load features
     print("\n[1/5] Loading feature matrix...")
     builder = DatasetBuilder()
-    features = builder.load("data/features/eurusd_2020")
+    features = builder.load("data/features")
     print(f"      Shape: {features.shape}")
     print(f"      Samples: {features.shape[0]:,}")
     
@@ -92,7 +92,7 @@ def main():
     
     # 5. Save model
     print("\n[5/5] Saving model...")
-    save_path = "models/ppo_eurusd_2020.pt"
+    save_path = "models/ppo_eurusd_2020-2022.pt"
     torch.save(agent.model.state_dict(), save_path)
     print(f"      Saved to: {save_path}")
     
