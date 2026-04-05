@@ -21,7 +21,7 @@ def main():
     # 1. Load features
     print("\n[1/5] Loading feature matrix...")
     builder = DatasetBuilder()
-    features = builder.load("data/features")
+    features = builder.load("data/features/eurusd_2020_2022")
     print(f"      Shape: {features.shape}")
     print(f"      Samples: {features.shape[0]:,}")
     
