@@ -18,8 +18,8 @@ class Trainer:
     def __init__(
         self,
         feature_matrix: np.ndarray,
-        rollout_steps: int = 2048,
-        total_steps: int = 1_000_000,
+        rollout_steps: int = 4096,
+        total_steps: int = 3_000_000,
     ):
         # Environment
         self.env = ForexEnv(feature_matrix)
@@ -72,6 +72,9 @@ class Trainer:
                     info,
                 ) = self.env.step(action)
 
+                opened_trade = (action != 1 and prev_position == 0)
+                closed_trade = (action != 0 and infor["position"] == 0)
+
                 # Reward shaping
                 reward = self.reward_fn.calculate(
                     pnl_change=raw_reward,
@@ -97,6 +100,7 @@ class Trainer:
                 ep_reward += reward
                 state = next_state
                 step += 1
+                prev_position = info["position"] # track previous position for reward shaping
 
                 done = terminated or truncated
 
@@ -104,6 +108,7 @@ class Trainer:
                 if done:
 
                     state, _ = self.env.reset()
+                    prev_position = 0 # reset position tracker
 
                     self.logger.info(
                         f"Episode {episode} | "

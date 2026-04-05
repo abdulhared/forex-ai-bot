@@ -20,11 +20,11 @@ class PPOAgent:
         input_dim:   int   = 20,
         hidden_dim:  int   = 128,
         n_actions:   int   = 3,
-        lr:          float = 3e-5, # change to 3e-5 after first training run 
+        lr:          float = 3e-5,  
         gamma:       float = 0.99,
         epsilon:     float = 0.2,
-        epochs:      int   = 4,
-        batch_size:  int   = 64,
+        epochs:      int   = 8,
+        batch_size:  int   = 128,
     ):
 
         # Hyperparameters
