@@ -18,8 +18,8 @@ class Trainer:
     def __init__(
         self,
         feature_matrix: np.ndarray,
-        rollout_steps: int = 4096,
-        total_steps: int = 3_000_000,
+        rollout_steps: int = 2048,
+        total_steps: int = 2_000_000,
     ):
         # Environment
         self.env = ForexEnv(feature_matrix)

@@ -11,10 +11,10 @@ class RewardFunction:
         self,
         spread_pips:       float = 1.5,   # typical EUR/USD spread
         hold_penalty:      float = 0.05,  # penalty per step in losing trade
-        drawdown_penalty:  float = 5.0,   # multiplier for drawdown punishment
-        profit_bonus:      float = 0.10,  # bonus for closing a profitable trade
+        drawdown_penalty:  float = 0.05,   # multiplier for drawdown punishment
+        profit_bonus:      float = 0.001,  # bonus for closing a profitable trade
         pip_value:         float = 0.10,
-        overtrade_penalty:   float = 0.20,  # penalty for opening a new trade when already in one
+        overtrade_penalty:   float = 0.002,  # penalty for opening a new trade when already in one
         overtrade_window:    int = 20,      # number of recent steps to check for overtrading
         max_trades_in_window: int = 3,      # max trades allowed in the window
     ):

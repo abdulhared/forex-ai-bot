@@ -44,7 +44,7 @@ def main():
         batch_size=64
     )
     print(f"      Model: Actor-Critic (20 -> 128 -> 3)")
-    print(f"      Hyperparams: lr=3e-4, gamma=0.99, epsilon=0.2")
+    print(f"      Hyperparams: lr=1e-4, gamma=0.99, epsilon=0.2")
     
     # 4. Training loop (10k steps for quick test)
     print("\n[4/5] Starting training (10,000 steps)...")
@@ -72,7 +72,7 @@ def main():
             episode_rewards.append(episode_reward)
             
             # Update every 2048 steps or at episode end
-            if len(agent.buffer.states) >= 64:
+            if len(agent.buffer.states) >= 2048:
                 agent.update()
             
             # Reset
