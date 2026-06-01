@@ -53,6 +53,7 @@ class Trainer:
 
         episode = 0
         step = 0
+        prev_position = 0 # track previous position for reward shaping
         ep_reward = 0.0
 
         # Training loop
@@ -73,15 +74,15 @@ class Trainer:
                 ) = self.env.step(action)
 
                 opened_trade = (action != 1 and prev_position == 0)
-                closed_trade = (action != 0 and infor["position"] == 0)
+                closed_trade = (action != 0 and info["position"] == 0)
 
                 # Reward shaping
                 reward = self.reward_fn.calculate(
                     pnl_change=raw_reward,
                     unrealized_pnl=info["unrealized_pnl"],
                     position=info["position"],
-                    opened_trade=False,
-                    closed_trade=False,
+                    opened_trade=opened_trade,
+                    closed_trade=closed_trade,
                     equity=info["total_equity"],
                     initial_balance=10_000.0,
                 )
@@ -127,5 +128,7 @@ class Trainer:
             self.agent.update()
 
         self.logger.info("Training complete")
+        Path("models").mkdir(exist_ok=True)
+        torch.save(self.agent.model.state_dict(), "models/ppo_eurusd.pth")
 
         return self.agent.model

@@ -32,34 +32,56 @@ class SignalGenerator:
 
         Returns:
             Signal dict matching SignalSchema fields
+
+        Raises:
+            RuntimeError: If model is not loaded
         """
+        # Guard: Check if model is loaded
+        if self.model_loader.model is None:
+            raise RuntimeError(
+                f"Cannot generate signal: Model not loaded. "
+                f"ModelLoader version={self.model_loader.version} has no model."
+            )
+
         # 1. Convert feature list to tensor with batch dimension
         tensor = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
 
         # 2. Run inference — no gradient tracking needed
         with torch.no_grad():
-            logits = self.model_loader.model(tensor)
-            probs = torch.softmax(logits, dim=1)
+            action_probs, value = self.model_loader.model(tensor)
 
         # 3. Extract action and confidence
+        # Note: action_probs are already softmaxed from ActorCritic forward pass
+        probs = action_probs
         action_index = torch.argmax(probs, dim=1).item()
         confidence = probs[0][action_index].item()
         action = ACTION_MAP[action_index]
 
-        # 4. Build signal dict
+        # 4. Minimum confidence filter - only act on meaningful signals
+        if confidence < 0.50:
+            action = "HOLD"
+            self.logger.bind(category=LogCategory.SYSTEM.value).info(
+                f"Signal rejected: {pair} confidence={confidence:.2%} < 50% threshold. Forced HOLD."
+            )
+
+        # 5. Calculate risk/reward ratio
+        risk_reward = abs(take_profit - stop_loss)
+
+        # 6. Build signal dict
         signal = {
             "pair": pair,
             "action": action,
             "confidence": round(confidence, 4),
             "stop_loss": stop_loss,
             "take_profit": take_profit,
+            "risk_reward": risk_reward,  # Added for downstream modules
             "lot_size": 0.0,   # filled later by risk manager
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "model_version": self.model_loader.version,
         }
 
         self.logger.bind(category=LogCategory.SYSTEM.value).info(
-            f"Signal: {action} {pair} confidence={confidence:.2%}"
+            f"Signal: {action} {pair} confidence={confidence:.2%} risk_reward={risk_reward:.5f}"
         )
 
         return signal
