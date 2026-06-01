@@ -48,7 +48,7 @@ def main():
     
     # 4. Training loop (10k steps for quick test)
     print("\n[4/5] Starting training (10,000 steps)...")
-    total_timesteps =10_000
+    total_timesteps =2_000_000
     episode_rewards = []
     
     state, _ = env.reset()
