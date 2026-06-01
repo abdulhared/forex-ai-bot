@@ -44,9 +44,10 @@ API_KEY     = os.getenv("API_KEY")
 API_KEY_DEV = os.getenv("API_KEY_DEV")
 
 # ── Monitoring ────────────────────────────────────────────
-SENTRY_DSN         = os.getenv("SENTRY_DSN")
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
+SENTRY_DSN              = os.getenv("SENTRY_DSN")
+TELEGRAM_BOT_TOKEN      = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID        = os.getenv("TELEGRAM_CHAT_ID")
+TRADINGVIEW_WEBHOOK_URL = os.getenv("TRADINGVIEW_WEBHOOK_URL")
 
 # ── Application ───────────────────────────────────────────
 APP_ENV   = os.getenv("APP_ENV", "development")

@@ -37,7 +37,7 @@ def main():
         input_dim=20,
         hidden_dim=128,
         n_actions=3,
-        lr=3e-4,
+        lr=1e-4,
         gamma=0.99,
         epsilon=0.2,
         epochs=4, 
@@ -48,7 +48,7 @@ def main():
     
     # 4. Training loop (10k steps for quick test)
     print("\n[4/5] Starting training (10,000 steps)...")
-    total_timesteps = 2_000_000
+    total_timesteps =10_000
     episode_rewards = []
     
     state, _ = env.reset()

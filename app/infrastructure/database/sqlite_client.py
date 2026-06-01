@@ -14,7 +14,7 @@ class SQLiteClient:
         os.makedirs("data", exist_ok=True)
 
         # connect to the database
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, check_same_thread=False, timeout=10) as conn:
             # get all migration files in order
             migration_dir = "app/infrastructure/database/migrations/"
 
@@ -41,7 +41,7 @@ class SQLiteClient:
             conn.commit()
     
     def create_trade(self, trade_data):
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, check_same_thread=False, timeout=10) as conn:
             # get a cursor
             cursor = conn.cursor()
 
@@ -64,27 +64,37 @@ class SQLiteClient:
             # but explicit commit is fine too
             conn.commit()
     
-    def update_trade(self, trade_id, close_price):
-        with sqlite3.connect(self.db_path) as conn:
+    def update_trade(self, trade_id, close_price, pnl=None):
+        with sqlite3.connect(self.db_path, check_same_thread=False, timeout=10) as conn:
             cursor = conn.cursor()
 
-            cursor.execute(""" 
-                UPDATE trades
-                SET status = 'closed',
-                    close_price = ?,
-                    closed_at = datetime('now')
-                WHERE id = ?
-            """, (close_price, trade_id))
+            if pnl is not None:
+                cursor.execute(""" 
+                    UPDATE trades
+                    SET status = 'closed',
+                        close_price = ?,
+                        closed_at = datetime('now'),
+                        pnl = ?
+                    WHERE id = ?
+                """, (close_price, pnl, trade_id))
+            else:
+                cursor.execute(""" 
+                    UPDATE trades
+                    SET status = 'closed',
+                        close_price = ?,
+                        closed_at = datetime('now')
+                    WHERE id = ?
+                """, (close_price, trade_id))
             conn.commit()
 
         
     def log_signal(self, signal_data):
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, check_same_thread=False, timeout=10) as conn:
             cursor = conn.cursor()
 
             cursor.execute("""
-                INSERT INTO signals (id, pair, action, confidence, stop_loss, take_profit, lot_size, model_version)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO signals (id, pair, action, confidence, stop_loss, take_profit, lot_size, model_version, risk_reward)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 signal_data['id'],
                 signal_data['pair'],
@@ -93,13 +103,14 @@ class SQLiteClient:
                 signal_data['stop_loss'],
                 signal_data['take_profit'],
                 signal_data['lot_size'],
-                signal_data['model_version']
+                signal_data['model_version'],
+                signal_data.get('risk_reward')  # Use .get() for backward compatibility
             ))
 
             conn.commit()
 
     def get_performance(self, date):
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, check_same_thread=False, timeout=10) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
@@ -115,7 +126,7 @@ class SQLiteClient:
             return dict(row)
 
     def log_error(self, category, message, context):
-        with sqlite3.connect(self.db_path) as conn:
+        with sqlite3.connect(self.db_path, check_same_thread=False, timeout=10) as conn:
             cursor = conn.cursor()
 
             cursor.execute(""" 
@@ -129,26 +140,28 @@ class SQLiteClient:
 
             conn.commit()
     
-    def get_all_trades(self):
-        with sqlite3.connect(self.db_path) as conn:
+    def get_all_trades(self, limit=50):
+        with sqlite3.connect(self.db_path, check_same_thread=False, timeout=10) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
             cursor.execute("""
                 SELECT * FROM trades
                 ORDER BY opened_at DESC 
-            """)
+                LIMIT ?
+            """, (limit,))
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
 
-    def get_all_signals(self):
-        with sqlite3.connect(self.db_path) as conn:
+    def get_all_signals(self, limit=50):
+        with sqlite3.connect(self.db_path, check_same_thread=False, timeout=10) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
             cursor.execute("""
                 SELECT * FROM signals
                 ORDER BY timestamp DESC
-            """)
+                LIMIT ?
+            """, (limit,))
             rows = cursor.fetchall()
             return [dict(row) for row in rows]

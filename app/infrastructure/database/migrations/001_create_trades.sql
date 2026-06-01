@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS trades (
     status         TEXT    NOT NULL DEFAULT 'open',
     opened_at      TEXT    NOT NULL DEFAULT (datetime('now')),
     close_price    REAL, 
-    closed_at      TEXT
+    closed_at      TEXT,
+    pnl            REAL
 );

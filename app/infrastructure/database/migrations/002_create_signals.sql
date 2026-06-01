@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS signals (
     stop_loss      REAL    NOT NULL,
     lot_size       REAL    NOT NULL,
     model_version  TEXT    NOT NULL,
-    timestamp      TEXT    NOT NULL DEFAULT (datetime('now'))
-)
+    timestamp      TEXT    NOT NULL DEFAULT (datetime('now')),
+    risk_reward    REAL
+);
