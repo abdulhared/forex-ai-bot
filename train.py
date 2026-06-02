@@ -46,8 +46,8 @@ def main():
     print(f"      Model: Actor-Critic (20 -> 128 -> 3)")
     print(f"      Hyperparams: lr=1e-4, gamma=0.99, epsilon=0.2")
     
-    # 4. Training loop (10k steps for quick test)
-    print("\n[4/5] Starting training (10,000 steps)...")
+    # 4. Training loop (2M steps for quick test)
+    print("\n[4/5] Starting training (2,000,000 steps)...")
     total_timesteps =2_000_000
     episode_rewards = []
     
