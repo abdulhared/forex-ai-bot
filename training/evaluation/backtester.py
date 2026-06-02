@@ -87,7 +87,7 @@ class Backtester:
             action = ACTION_MAP.get(action_index, "HOLD")
             
             # Minimum confidence threshold
-            if confidence < 0.50:
+            if confidence < 0.36:
                 action = "HOLD"
             
             # Handle trade logic

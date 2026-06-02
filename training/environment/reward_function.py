@@ -10,7 +10,7 @@ class RewardFunction:
     def __init__(
         self,
         spread_pips:       float = 1.5,   # typical EUR/USD spread
-        hold_penalty:      float = 0.05,  # penalty per step in losing trade
+        hold_penalty:      float = 0.001,  # penalty per step in losing trade
         drawdown_penalty:  float = 0.05,   # multiplier for drawdown punishment
         profit_bonus:      float = 0.001,  # bonus for closing a profitable trade
         pip_value:         float = 0.10,
